@@ -1,0 +1,17 @@
+.filter-link {
+    display: block;
+    padding: 0.25rem 0.5rem;
+    font-size: 14px;
+    text-decoration-color: transparent;
+
+    &:hover {
+        color: var(--ucla-primary-blue);
+        text-decoration-color: var(--ucla-primary-blue);
+        background-color: var(--ucla-gray-1);
+    }
+
+    &[aria-current='page'] {
+        color: var(--ucla-primary-blue);
+        font-weight: 700;
+    }
+}

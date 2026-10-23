@@ -1,0 +1,59 @@
+---
+import DefaultTemplate from '@layouts/DefaultTemplate.astro';
+import HomeTemplate from '@layouts/HomeTemplate.astro';
+import IndexTemplate from '@layouts/IndexTemplate.astro';
+import PageWrapper from '@components/document/PageWrapper.astro';
+// import ParentTemplate from '@layouts/ParentTemplate.astro';
+import PeopleTemplate from '@layouts/PeopleTemplate.astro';
+import { getCollection } from 'astro:content';
+import { organizationStructuredData } from '@lib/utils/jsonLD';
+
+export async function getStaticPaths() {
+    const pages = await getCollection('pages');
+
+    return pages.map((page) => ({
+        params: {
+            page: page.data.slug,
+        },
+        props: { page },
+    }));
+}
+
+const { page } = Astro.props;
+
+// alias component to an existing template component
+let Template;
+switch (page.data._type) {
+    case 'page_home':
+        Template = HomeTemplate;
+        break;
+    case 'page_index':
+        Template = IndexTemplate;
+        break;
+    case 'page_people':
+        Template = PeopleTemplate;
+        break;
+    // case 'utility':
+    //     //
+    //     break;
+    default:
+        Template = DefaultTemplate;
+        break;
+}
+
+// add organization structured data to About/Our Mission page
+---
+
+<PageWrapper
+    footerMargin={page.data.options.footerMargin}
+    id={page.id}
+    og={page.data.openGraph}
+    seo={page.data.seo}
+    structuredData={page.id === 'ca090807-715c-4e1a-b14f-87beafa19309'
+        ? organizationStructuredData()
+        : undefined}
+    template={page.data._type.slice(5)}
+    title={page.data.title}
+>
+    <Template page={page} />
+</PageWrapper>

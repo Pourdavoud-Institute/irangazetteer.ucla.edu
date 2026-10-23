@@ -1,0 +1,40 @@
+---
+import { isBefore, parse } from '@formkit/tempo';
+import PostPreviewList from '@components/posts/PostPreviewList.astro';
+import PostsSidebar from '@components/posts/PostsSidebar.astro';
+import { getCollection } from 'astro:content';
+
+const posts = await getCollection('posts');
+// sort by newest
+const sorted = posts.sort((a, b) => {
+    const dateA = parse(a.data.displayDate, 'YYYY-MM-DD');
+    const dateB = parse(b.data.displayDate, 'YYYY-MM-DD');
+    return isBefore(dateA, dateB) ? 1 : -1;
+});
+---
+
+<div class="content-wrapper">
+    <div class="with-sidebar">
+        <div class="sidebar-panel | flow" data-tempo="andante">
+            <PostsSidebar />
+        </div>
+        <div class="main-panel">
+            <div class="flow" data-tempo="allegro">
+                <h2>All Posts</h2>
+                <p>
+                    Showing {posts.length}{' '}
+                    {posts.length == 1 ? 'result' : 'results'}
+                </p>
+            </div>
+            <div class="posts-list">
+                {sorted.map((post) => <PostPreviewList post={post} />)}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .posts-list {
+        max-width: var(--paragraph-measure);
+    }
+</style>

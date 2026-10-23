@@ -1,0 +1,66 @@
+.index-wrapper {
+    margin-block-start: var(--section-spacing);
+
+    &[data-index='events'] {
+        --main-min-width: 70%;
+        --sidebar-min-width: 14rem;
+        --sidebar-gap: 3rem;
+
+        & .sidebar-panel {
+            --flow-space: 1rem;
+            padding-block-start: 1rem;
+        }
+    }
+
+    &[data-index='posts'] {
+        --main-min-width: 63%;
+        --sidebar-min-width: 12rem;
+        --sidebar-gap: 4rem;
+    }
+
+    &[data-index='videos'] {
+        --main-min-width: 58%;
+        --sidebar-min-width: 17rem;
+        --sidebar-gap: 4rem;
+
+        & .filters-panel {
+            --cluster-justify: center;
+            & .small-title {
+                color: var(--ucla-primary-blue);
+                font-size: var(--step--1);
+            }
+        }
+
+        & .clear-filters {
+            --cluster-justify: center;
+            --flow-space: var(--space-s);
+        }
+
+        & .list-info {
+            --cluster-justify: space-between;
+
+            &.contained {
+                max-width: var(--wrapper-max-width-slim);
+                margin-inline: auto;
+            }
+
+            & .list-views {
+                --cluster-justify: flex-start;
+            }
+        }
+
+        & .main-panel {
+            margin-block-start: var(--space-xl);
+        }
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .index-wrapper {
+        &[data-index='videos'] {
+            & :is(.filters-panel, .clear-filters) {
+                --cluster-justify: flex-start;
+            }
+        }
+    }
+}

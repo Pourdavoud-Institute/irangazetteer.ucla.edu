@@ -1,0 +1,148 @@
+---
+import { addMonth, isAfter, isBefore, sameDay, tzDate } from '@formkit/tempo';
+import ButtonLink from '@components/interactive/ButtonLink.astro';
+import type { CollectionEntry } from 'astro:content';
+import EventPreview from '@components/events/EventPreview.astro';
+import type { EventsPreviewList } from '@content/schemaFragments/pageModules';
+import type { Link } from '@content/schemaFragments/sanityComponents';
+import { SanityEventCategories } from '@lib/sanity/dicts';
+import { getCollection } from 'astro:content';
+import { sortUpcoming } from '@lib/utils/sortEvents';
+
+interface Props {
+    module: EventsPreviewList;
+    limit?: number; // default limit for events to show
+}
+
+const { module, limit = 3 } = Astro.props;
+
+const now = new Date();
+const monthLimit = 6;
+const events = await getCollection('events', ({ data }) => data.cunardEvent);
+const upcomingEvents: CollectionEntry<'events'>[] = [];
+const pastEvents: CollectionEntry<'events'>[] = [];
+
+// filter events
+for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+
+    if (
+        // check if dates are same day with timezone offset
+        // filter to show only upcoming within next 6 months (same as Events Index)
+        (sameDay(
+            tzDate(event.data.details.startDate, 'America/Los_Angeles'),
+            now,
+        ) ||
+            isAfter(event.data.details.startDate, now)) &&
+        isBefore(event.data.details.startDate, addMonth(now, monthLimit))
+    ) {
+        // filter Cunard Center events
+        if (event.data.cunardEvent) {
+            upcomingEvents.push(event);
+        }
+    } else if (isBefore(event.data.details.startDate, now)) {
+        // filter Cunard Center events
+        if (event.data.cunardEvent) {
+            pastEvents.push(event);
+        }
+    }
+}
+
+const links: Link[] = [
+    {
+        type: 'internal',
+        href: '/events',
+        label: 'View Ancient Studies Calendar',
+    },
+    {
+        type: 'internal',
+        href: '/events/categories/cunard-center',
+        label: 'View Cunard Center Events',
+    },
+    {
+        type: 'internal',
+        href: '/events/archive/1',
+        label: 'View Events Archive',
+    },
+];
+
+const upcomingSorted = sortUpcoming(upcomingEvents);
+---
+
+<section
+    class:list={[{ 'section-margin': module.options.sectionMargin }]}
+    data-module={module._type}
+>
+    <div class="content-wrapper">
+        {
+            module.showUpcoming && upcomingEvents.length > 0 && (
+                <div data-collection="upcoming">
+                    <h2 class="small-title | eyebrow" id="upcoming-events">
+                        Upcoming Cunard Center Events
+                    </h2>
+                    <div class="flex-items">
+                        {upcomingSorted.slice(0, limit).map((event) => (
+                            <EventPreview event={event} showDatePreview />
+                        ))}
+                    </div>
+                </div>
+            )
+        }
+        {
+            module.showPast && (
+                <div data-collection="past">
+                    <h2 class="small-title eyebrow" id="recent-events">
+                        Recent Cunard Center Events
+                    </h2>
+                    <div class="flex-items">
+                        {pastEvents
+                            .sort((a, b) => {
+                                const dateA = new Date(
+                                    a.data.details.startDate,
+                                );
+                                const dateB = new Date(
+                                    b.data.details.startDate,
+                                );
+                                return (dateB as any) - (dateA as any);
+                            })
+                            .slice(0, limit)
+                            .map((event) => (
+                                <EventPreview event={event} />
+                            ))}
+                    </div>
+                </div>
+            )
+        }
+        <div class="cta-links | cluster">
+            {
+                links.map((link, i) => (
+                    <ButtonLink
+                        link={link}
+                        style={i != 2 ? 'primary' : 'primary-ghost'}
+                    />
+                ))
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    [data-collection='upcoming'] {
+        margin-block-end: var(--space-2xl);
+    }
+
+    .flex-items {
+        margin-block-start: var(--space-m);
+    }
+
+    .cta-links {
+        --cluster-justify: center;
+        margin-block-start: var(--space-2xl);
+    }
+
+    @media screen and (max-width: 640px) {
+        .cta-links {
+            --cluster-justify: flex-start;
+        }
+    }
+</style>

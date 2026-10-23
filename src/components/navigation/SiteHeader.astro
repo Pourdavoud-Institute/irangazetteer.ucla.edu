@@ -1,0 +1,131 @@
+---
+import FeaturedNavigation from '@components/navigation/FeaturedNavigation.astro';
+import MainNavigation from '@components/navigation/MainNavigation.astro';
+import MobileNavigation from '@components/navigation/MobileNavigation.astro';
+import { getEntry } from 'astro:content';
+
+interface Props {
+    style?: 'default' | 'transparent';
+}
+
+const { style = 'default' } = Astro.props;
+
+// get main nav by id
+const mainNavigation = await getEntry(
+    'navigation',
+    'ba0e7fc0-16db-4d2f-a40c-1fab6366437a',
+);
+
+const featuredNavigation = await getEntry(
+    'navigation',
+    '3d22e241-0209-4462-b427-24c027512b83',
+);
+---
+
+<header class="site-header" data-style={style}>
+    <!-- Skip to Content Link -->
+    <a class="skip-link | small-title text-step--1" href="#main-content">
+        Skip to Content
+    </a>
+    <MainNavigation navItems={mainNavigation?.data.items} />
+    <nav aria-label="Featured" class="nav-featured">
+        <div class="logos | cluster">
+            <a class="logo-link" href="/">
+                <img
+                    alt="UCLA Cunard Center logo"
+                    decoding="auto"
+                    loading="eager"
+                    src={style === 'transparent'
+                        ? '/images/logos/cunard-ga-logo-seal-white-UCLA.png'
+                        : '/images/logos/cunard-ga-logo-seal-UCLA.png'}
+                    width="325"
+                />
+            </a>
+        </div>
+        <FeaturedNavigation
+            navItems={featuredNavigation?.data.items}
+            style={style}
+        />
+        <MobileNavigation
+            featuredNavItems={featuredNavigation?.data.items}
+            mainNavItems={mainNavigation?.data.items}
+            style={style}
+        />
+    </nav>
+</header>
+
+<style>
+    .site-header {
+        position: relative;
+        /* box-shadow: var(--shadow-base); */
+        z-index: 50;
+        background-color: var(--ucla-white);
+
+        &.home {
+            position: absolute;
+            width: 100%;
+            background-color: var(--ucla-white);
+        }
+
+        &[data-style='transparent'] {
+            position: absolute;
+            width: 100%;
+            background-color: transparent;
+        }
+    }
+
+    .nav-featured {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        padding-inline: 2rem;
+
+        & > :last-child {
+            flex-grow: 1;
+        }
+    }
+
+    .logos {
+        padding-block: 1rem;
+
+        & img {
+            width: 30rem;
+        }
+    }
+
+    .logo-link {
+        &:hover {
+            opacity: 0.75;
+        }
+    }
+
+    @media screen and (max-width: 640px) {
+        .logos {
+            & img {
+                max-width: 20rem;
+            }
+        }
+
+        .nav-featured {
+            padding-inline: 1rem;
+        }
+    }
+
+    @media screen and (max-width: 450px) {
+        .logos {
+            & img {
+                max-width: 15rem;
+            }
+        }
+    }
+
+    @media screen and (max-width: 350px) {
+        .logos {
+            & img {
+                max-width: 12rem;
+            }
+        }
+    }
+</style>

@@ -1,0 +1,138 @@
+---
+import type { PersonSpeaker } from '@content/schemaFragments/sanityComponents';
+import type { VideoEventFilter } from '@content/videos';
+import VideosCollection from './VideosCollection.vue';
+import { getCollection } from 'astro:content';
+import v from 'voca';
+
+/* Prepare video collection */
+const videos = await getCollection('videos');
+
+/* Prepare filters */
+const videoEventsMap = new Map<string, any>();
+const videoSpeakersMap = new Map<string, any>();
+for (let i = 0; i < videos.length; i++) {
+    const video = videos[i];
+    let eventFilter;
+
+    if (video.data.eventFiltersRef.length) {
+        eventFilter = video.data.eventFiltersRef[0];
+    }
+
+    if (eventFilter && !videoEventsMap.has(eventFilter._id)) {
+        if (video.data.speakersRef.length) {
+            eventFilter.associatedSpeakers = video.data.speakersRef.map(
+                (speaker) => speaker._id,
+            );
+            videoEventsMap.set(eventFilter?._id, eventFilter);
+        } else {
+            eventFilter.associatedSpeakers = [];
+            videoEventsMap.set(eventFilter?._id, eventFilter);
+        }
+        // const speakerIDs = [];
+        // if (video.data.speakersRef.length > 0) {
+        //     for (let i = 0; i < video.data.speakersRef.length; i++) {
+        //         const speaker = video.data.speakersRef[i];
+        //         speakerIDs.push(speaker._id);
+        //     }
+        // }
+        // eventFilter.associatedSpeakers = speakerIDs;
+        // videoEventsMap.set(eventFilter?._id, eventFilter);
+    } else if (eventFilter && videoEventsMap.has(eventFilter._id)) {
+        // update the existing map item with current speakers
+        if (video.data.speakersRef.length) {
+            const mapItem = videoEventsMap.get(eventFilter._id);
+            mapItem.associatedSpeakers = [
+                ...mapItem.associatedSpeakers,
+                ...video.data.speakersRef.map((speaker) => speaker._id),
+            ];
+        }
+    }
+
+    if (video.data.speakersRef.length) {
+        for (let j = 0; j < video.data.speakersRef.length; j++) {
+            const speaker = video.data.speakersRef[j];
+            // if no speaker, add it to the map with the current event
+            if (!videoSpeakersMap.has(speaker._id)) {
+                speaker.associatedEvents = [eventFilter?._id];
+                videoSpeakersMap.set(speaker._id, speaker);
+            } else {
+                // update the existing map item with current event
+                const mapItem = videoSpeakersMap.get(speaker._id);
+                mapItem.associatedEvents = [
+                    ...mapItem.associatedEvents,
+                    eventFilter?._id,
+                ];
+            }
+        }
+    }
+}
+
+/* Sort filters */
+const videoEvents = (
+    Array.from(videoEventsMap.values()) as VideoEventFilter[]
+).sort((a, b) => {
+    // standardize titles for more accurate sorting
+    let titleA = v.chain(a.title).slugify().value();
+    let titleB = v.chain(b.title).slugify().value();
+
+    // strip the starting `the-`s
+    if (v.startsWith(titleA, 'the-')) {
+        titleA = v.slice(titleA, 4);
+    }
+    if (v.startsWith(titleB, 'the-')) {
+        titleB = v.slice(titleB, 4);
+    }
+
+    if (titleA < titleB) {
+        return -1;
+    }
+    if (titleA > titleB) {
+        return 1;
+    }
+    return 0;
+});
+
+// todo: better sort using voca standardized strings
+const videoSpeakers = (
+    Array.from(videoSpeakersMap.values()) as PersonSpeaker[]
+).sort((a, b) => {
+    if (a.name.lastName < b.name.lastName) {
+        return -1;
+    }
+    if (a.name.lastName > b.name.lastName) {
+        return 1;
+    }
+    return 0;
+});
+---
+
+<div class="content-wrapper">
+    <VideosCollection
+        client:load
+        events={videoEvents}
+        speakers={videoSpeakers}
+        videos={videos}
+    />
+</div>
+
+<style>
+    /* center header items */
+    :global(.page[data-id='5d38f0c5-710f-48b9-94b1-612d8dedaccb'] h1) {
+        text-align: center;
+        max-width: none;
+    }
+
+    :global(.page[data-id='5d38f0c5-710f-48b9-94b1-612d8dedaccb'] h1::after) {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    @media screen and (max-width: 768px) {
+        :global(
+            .page[data-template='index'] [data-index='videos'] .back-to-top
+        ) {
+            display: none;
+        }
+    }
+</style>

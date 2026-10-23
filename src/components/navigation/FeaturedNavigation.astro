@@ -1,0 +1,82 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { sanityLink } from '@lib/utils/sanityLink';
+
+interface Props {
+    navItems?: CollectionEntry<'navigation'>['data']['items'];
+    style?: 'default' | 'transparent';
+}
+
+const { navItems, style } = Astro.props;
+---
+
+<ul class="featured-nav-items cluster" data-style={style}>
+    {
+        navItems &&
+            navItems.map((navItem) => {
+                if (navItem.itemType !== 'linkList') {
+                    const linkParts = sanityLink(navItem);
+                    return (
+                        <li>
+                            <a
+                                class="nav-link-featured"
+                                href={linkParts.url}
+                                target={linkParts.target}
+                            >
+                                {linkParts.label}
+                            </a>
+                        </li>
+                    );
+                }
+            })
+    }
+</ul>
+
+<style>
+    .featured-nav-items {
+        --cluster-justify: flex-end;
+        --cluster-space: 1.75rem;
+
+        &[data-style='transparent'] {
+            --nav-link-color: var(--ucla-white);
+        }
+
+        &[data-style='default'] {
+            --nav-link-color-hover: var(--ucla-darker-blue);
+        }
+    }
+
+    .nav-link-featured {
+        position: relative;
+        display: block;
+        font-family: var(--font-heading);
+        font-size: var(--step-1);
+        font-weight: var(--font-heading-weight);
+        line-height: 1.15;
+        text-decoration: none;
+        /* padding-inline: 0.5rem;
+        padding-block: 1.15rem;
+        text-align: center;
+        min-width: 160px;
+        background-color: var(--nav-link-tint, var(--ucla-gray-7)); */
+        color: var(--nav-link-color, inherit);
+        transition: color 0.2s;
+
+        &:hover {
+            color: var(
+                --nav-link-color-hover,
+                color-mix(
+                    in srgb,
+                    var(--nav-link-color, inherit),
+                    transparent 25%
+                )
+            );
+        }
+    }
+
+    @media screen and (max-width: 999px) {
+        .featured-nav-items {
+            display: none;
+        }
+    }
+</style>

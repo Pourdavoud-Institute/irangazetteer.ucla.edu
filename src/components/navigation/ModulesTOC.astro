@@ -1,0 +1,56 @@
+---
+/* Builds a TOC out of module headings (h2) */
+import type { CollectionEntry } from 'astro:content';
+import { getRichTextHeadings } from '@lib/utils/getRichTextHeadings';
+import v from 'voca';
+
+interface Props {
+    modules: CollectionEntry<'pages'>['data']['modules'];
+    type?: 'sidebar' | 'header'; // which toc style to display
+}
+
+const { modules, type = 'sidebar' } = Astro.props;
+
+// loop through modules to find sections to display, if any
+const displayModules: { heading: string; href: string }[] = [];
+for (const module of modules) {
+    if ('heading' in module && module.heading) {
+        displayModules.push({
+            heading: module.heading,
+            href: `#${v.slugify(module.heading)}`,
+        });
+    } else if (module._type == 'richText') {
+        const richTextHeadings = getRichTextHeadings(module);
+        displayModules.push(
+            ...richTextHeadings.map((heading) => ({
+                heading: heading,
+                href: `#${v.slugify(heading)}`,
+            })),
+        );
+    }
+}
+---
+
+{
+    displayModules.length !== 0 && (
+        <div class="on-page-nav" data-type={type}>
+            <div class="small-title">On This Page</div>
+            <nav>
+                <ul class:list={[{ cluster: type == 'header' }]}>
+                    {displayModules.map((module) => (
+                        <li>
+                            <a
+                                class:list={[
+                                    { 'sidebar-link': type == 'sidebar' },
+                                ]}
+                                href={module.href}
+                            >
+                                {module.heading}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+        </div>
+    )
+}

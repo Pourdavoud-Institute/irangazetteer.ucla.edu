@@ -1,0 +1,56 @@
+---
+import { type CollectionEntry, getEntry } from 'astro:content';
+import PersonPreview from '@components/people/PersonPreview.astro';
+
+interface Props {
+    node: {
+        _key: string;
+        _type: 'docRef';
+        reference: {
+            _id: string;
+            _type:
+                | 'event'
+                | 'person'
+                | 'post'
+                | 'video'
+                | 'page_default'
+                | 'page_index'
+                | 'page_people'
+                | 'page_utility';
+        };
+    };
+}
+
+const { node } = Astro.props;
+// console.log(node);
+const refType = node.reference._type;
+const refID = node.reference._id;
+
+let reference:
+    | CollectionEntry<'events'>
+    | CollectionEntry<'pages'>
+    | CollectionEntry<'people'>
+    | CollectionEntry<'posts'>
+    | undefined = undefined;
+
+switch (refType) {
+    case 'person':
+        reference = await getEntry('people', refID);
+        break;
+    case 'post':
+        reference = await getEntry('posts', refID);
+        break;
+    default:
+        reference = await getEntry('pages', refID);
+        break;
+}
+---
+
+{
+    refType == 'person' && (
+        <PersonPreview
+            person={reference as CollectionEntry<'people'>}
+            withAnimate={false}
+        />
+    )
+}

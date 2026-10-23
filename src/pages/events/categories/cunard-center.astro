@@ -1,0 +1,54 @@
+---
+/* Redundant to repeat this or try to fit in Index Template? */
+import DefaultHeader from '@components/pageHeaders/DefaultHeader.astro';
+import EventsList from '@components/events/EventsList.astro';
+import EventsSidebar from '@components/events/EventsSidebar.astro';
+import PageWrapper from '@components/document/PageWrapper.astro';
+import { getCollection } from 'astro:content';
+import { sortUpcoming } from '@lib/utils/sortEvents';
+
+const events = await getCollection('events', ({ data }) => data.cunardEvent);
+---
+
+<PageWrapper
+    filterType="category"
+    footerMargin={true}
+    id="cunard-center-events"
+    template="eventsTaxonomyTerm"
+    title={`Cunard Center Event Category`}
+>
+    <DefaultHeader
+        breadcrumbsCollection="eventCategories"
+        breadcrumbsStyle="lighter"
+        title="Events"
+    />
+    <div
+        class="index-wrapper"
+        data-index="events"
+        id={`cunard-center-events-index`}
+    >
+        <div class="content-wrapper">
+            <div class="with-sidebar">
+                <div class="sidebar-panel | flow" data-tempo="andante">
+                    <EventsSidebar />
+                </div>
+                <div class="main-panel">
+                    <div class="flow" data-tempo="allegro">
+                        <h2 data-pagefind-meta="title">Cunard Center Events</h2>
+                        <p>
+                            Showing {events.length}{' '}
+                            {events.length == 1 ? 'result' : 'results'}
+                        </p>
+                    </div>
+                    {
+                        events.length > 0 && (
+                            <EventsList
+                                events={sortUpcoming(events).toReversed()}
+                            />
+                        )
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</PageWrapper>
