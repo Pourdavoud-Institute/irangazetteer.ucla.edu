@@ -13,17 +13,13 @@ export const PEOPLE_QUERY = groq`*[_type == "person"] {
     affiliation,
     "image": headshot ${FEATURED_IMAGE_PROJECTION},
     "roles": coalesce(
-        roles[] {
-            "title": roleTitle,
-            "organization": roleOrganization
-        },
+        roles[],
         []
     ),
     "showPage": coalesce(showPage, false),
-    "departments": coalesce(departments, []),
     institution,
     facultyTitle,
-    facultyLink,
+    externalLink,
     "contact": {
         email,
     },
@@ -33,21 +29,6 @@ export const PEOPLE_QUERY = groq`*[_type == "person"] {
             ...,
             _type == "richTextLink" => ${LINK_PROJECTION}
         }
-    }, []),
-    showCV,
-    "cvSections": coalesce(cvSections[] {
-        _type,
-        title,
-        _type == "cvSection" => {
-            "blocks": coalesce(blocks[]{
-                ...,
-                markDefs[] {
-                    ...,
-                    _type == "richTextLink" => ${LINK_PROJECTION}
-                }
-            }, [])
-        },
-        ${PUBLICATIONS_LIST_PROJECTION}
     }, []),
     "categories": coalesce(
         categories[]->{

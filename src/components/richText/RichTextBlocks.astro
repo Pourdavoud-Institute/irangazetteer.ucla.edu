@@ -6,6 +6,7 @@ import RichTextBreak from './RichTextBreak.astro';
 import RichTextCustomHTML from './RichTextCustomHTML.astro';
 import RichTextDocRef from './RichTextDocRef.astro';
 import RichTextImage from './RichTextImage.astro';
+import RichTextInlineFigure from './RichTextInlineFigure.astro';
 import RichTextLink from './RichTextLink.astro';
 import RichTextLinkGroup from './RichTextLinkGroup.astro';
 
@@ -26,6 +27,7 @@ const components: PortableTextProps['components'] = {
     },
     mark: {
         richTextLink: RichTextLink,
+        figure_ref: RichTextInlineFigure,
     },
 };
 ---

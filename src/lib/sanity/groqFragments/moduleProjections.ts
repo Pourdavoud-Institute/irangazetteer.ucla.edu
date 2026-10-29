@@ -169,14 +169,6 @@ export const PUBLICATIONS_LIST_PROJECTION = groq`_type == "publicationsList" => 
     }
 }`;
 
-export const EVENTS_PREVIEW_LIST_PROJECTION = groq`_type == "eventsPreviewList" => {
-    showUpcoming,
-    showPast,
-    "options": {
-        sectionMargin
-    }
-}`;
-
 export const CARD_LIST_PROJECTION = groq`_type == "cardList" => {
     heading,
     cards[] {
@@ -223,13 +215,12 @@ export const RELATED_LINKS_PROJECTION = groq`_type == "relatedLinks" => {
 }`;
 
 export const RICH_TEXT_PROJECTION = groq`_type == "richText" => {
-    blocks[] {
+    "blocks": coalesce(blocks[] {
         ...,
         _type == "richTextImage" => {
             ...,
             "asset": asset->
         },
-        _type == "speaker" => ${SPEAKER_PROJECTION},
         _type == "linkGroup" => {
             links[] ${LINK_PROJECTION}
         },
@@ -241,12 +232,16 @@ export const RICH_TEXT_PROJECTION = groq`_type == "richText" => {
         },
         markDefs[] {
             ...,
+            _type == "figure_ref" => {
+                ...,
+                asset->,
+            },
             _type == "richTextLink" => ${LINK_PROJECTION}
         }
-    },
+    }, []),
     "options": {
         sectionMargin
-    }
+    },
 }`;
 
 export const PERSON_RICH_TEXT_PROJECTION = groq`_type == "personRichText" => {

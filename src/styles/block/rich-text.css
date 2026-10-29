@@ -56,7 +56,7 @@
     }
 
     & figure {
-        margin-block: var(--space-xl);
+        margin-block: var(--space-m);
     }
 
     & ul {

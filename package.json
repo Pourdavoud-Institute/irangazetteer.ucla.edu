@@ -1,6 +1,6 @@
 {
-    "name": "global-antiquity-astro",
-    "description": "A front-end website template for the UCLA Global Antiquity, built with Astro.",
+    "name": "iran-gazetteer-astro",
+    "description": "A front-end website template for the Archaeological Gazetteer of Iran, built with Astro.",
     "type": "module",
     "version": "1.0.0",
     "author": "Daniel Saunders <dtsaunders@humnet.ucla.edu> (https://daniel-saunders.com/)",
@@ -15,39 +15,43 @@
     ],
     "scripts": {
         "dev": "astro dev",
-        "build": "astro build && npm run index",
+        "build": "astro build --timings && npm run index",
         "index": "npx -y pagefind --site dist",
         "preview": "astro preview",
         "astro": "astro",
         "test": "vitest"
     },
     "dependencies": {
-        "@astrojs/sitemap": "^3.7.3",
-        "@astrojs/vue": "^7.0.1",
+        "@astrojs/sitemap": "^3.7.4",
+        "@astrojs/vue": "^7.1.2",
         "@formkit/tempo": "^1.1.0",
-        "@sanity/client": "^7.26.2",
+        "@sanity/client": "^8.10.1",
         "@sanity/image-url": "^2.1.1",
-        "astro": "^7.1.6",
+        "astro": "^7.4.2",
         "astro-portabletext": "^0.11.4",
-        "astro-seo": "^1.1.0",
-        "browserslist": "^4.28.7",
-        "fast-xml-parser": "^5.10.1",
+        "astro-seo": "^1.2.0",
+        "browserslist": "^4.29.4",
+        "fast-xml-parser": "^5.11.2",
         "fuse.js": "^7.5.0",
         "get-youtube-id": "^1.0.1",
-        "groq": "^6.9.0",
+        "groq": "^6.20.0",
+        "htm": "^3.1.1",
         "lightningcss": "^1.33.0",
-        "reka-ui": "^2.10.1",
-        "sharp": "^0.35.3",
+        "mapbox-gl": "^3.33.0",
+        "reka-ui": "^2.11.0",
+        "sharp": "^0.35.5",
+        "vhtml": "^2.2.0",
         "voca": "^1.4.1",
-        "vue": "^3.5.40"
+        "vue": "^3.5.44"
     },
     "devDependencies": {
+        "@types/vhtml": "^2.2.9",
         "@types/voca": "^1.4.6",
-        "@typescript-eslint/parser": "^8.66.0",
-        "eslint": "^10.8.0",
+        "@typescript-eslint/parser": "^8.72.0",
+        "eslint": "^10.13.0",
         "eslint-plugin-astro": "^1.7.0",
         "eslint-plugin-jsx-a11y": "^6.10.2",
-        "globals": "^17.9.0",
-        "vitest": "^4.1.10"
+        "globals": "^17.13.0",
+        "vitest": "^4.1.12"
     }
 }

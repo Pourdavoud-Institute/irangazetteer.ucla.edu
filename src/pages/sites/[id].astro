@@ -1,0 +1,399 @@
+---
+import Breadcrumbs from '@components/navigation/Breadcrumbs.astro';
+import ContactAvatar from '@components/people/ContactAvatar.astro';
+import PageWrapper from '@components/document/PageWrapper.astro';
+import PlaceCategory from '@components/places/PlaceCategory.astro';
+import PlacesArticleTOC from '@components/places/PlacesArticleTOC.astro';
+import RichText from '@components/modules/RichText.astro';
+import ShareLinks from '@components/interactive/ShareLinks.astro';
+import { convertCoordinates } from '@lib/utils/convertCoordinates';
+import { format } from '@formkit/tempo';
+import { getCollection } from 'astro:content';
+import { getPlaceCitation } from '@lib/utils/getPlaceCitation';
+
+export async function getStaticPaths() {
+    const places = await getCollection('places');
+    const people = await getCollection('people');
+    const periods = await getCollection('historicalPeriods');
+    const categories = await getCollection('placeCategories');
+
+    return places.map((place) => ({
+        params: {
+            id: `${place.data.placeID}`,
+            // slug: place.data.slug.slice(7), // slices "/sites/"
+        },
+        props: { place, people, periods, categories },
+    }));
+}
+
+const { place: page, people, periods, categories } = Astro.props;
+
+const articleAuthors = people.filter((person) =>
+    page.data.authors.some((author) => author._id === person.id),
+);
+---
+
+<PageWrapper
+    filterType="place"
+    footerMargin={true}
+    id={page.id}
+    template="placesShow"
+    title={page.data.title}
+>
+    <Breadcrumbs collection="places" />
+    <div class="content-wrapper">
+        <article class="place | with-sidebar">
+            <div class="main-panel">
+                <header class="header | flow" data-tempo="presto">
+                    <h1>{page.data.title}</h1>
+                    <p class="persian-text" dir="rtl">
+                        {page.data.persianName}
+                    </p>
+                    <p class="description">{page.data.locationDescription}</p>
+                    {
+                        page.data.coordinates && (
+                            <p class="coordinates">
+                                <strong>
+                                    Coordinates (Latitude, Longitude):
+                                </strong>{' '}
+                                {page.data.coordinates?.lat},{' '}
+                                {page.data.coordinates?.lng} (
+                                {convertCoordinates(
+                                    page.data.coordinates.lat,
+                                    'lat',
+                                )}
+                                ,{' '}
+                                {convertCoordinates(
+                                    page.data.coordinates.lng,
+                                    'lon',
+                                )}
+                                )
+                            </p>
+                        )
+                    }
+                    {
+                        page.data.categories.length > 0 && (
+                            <div class="categories | cluster">
+                                {page.data.categories.map((category) => {
+                                    const linkedCategory = categories.find(
+                                        (c) => c.id === category._id,
+                                    );
+                                    return (
+                                        <PlaceCategory
+                                            category={linkedCategory}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        )
+                    }
+                </header>
+                <div
+                    class="map-wrapper"
+                    data-coordinates={JSON.stringify(page.data.coordinates)}
+                >
+                    <div class="switcher-menu">
+                        <strong>Select Map View: </strong>
+                        <select id="style-switcher" name="style-switcher">
+                            <option value="standard-satellite">Satellite</option
+                            >
+                            <option value="standard">Standard</option>
+                        </select>
+                    </div>
+                    <div id="map"></div>
+                </div>
+                <div class="article-content">
+                    {
+                        page.data.historicalPeriods.length > 0 && (
+                            <section class="historical-periods">
+                                <h2 id="historical-periods">
+                                    Historical Periods
+                                </h2>
+                                <div class="items | cluster">
+                                    {page.data.historicalPeriods.map(
+                                        (period) => {
+                                            const linkedPeriod = periods.find(
+                                                (p) => p.id === period._id,
+                                            );
+                                            return (
+                                                <a
+                                                    class="tag"
+                                                    href={
+                                                        linkedPeriod?.data.slug
+                                                    }
+                                                >
+                                                    {linkedPeriod?.data.title}
+                                                </a>
+                                            );
+                                        },
+                                    )}
+                                </div>
+                            </section>
+                        )
+                    }
+                    {
+                        page.data.articleContent && (
+                            <RichText
+                                module={page.data.articleContent}
+                                withPadding={false}
+                            />
+                        )
+                    }
+                </div>
+                <div class="article-footer">
+                    <section class="article-authors">
+                        <div class="small-title">Authors</div>
+                        <div class="cluster">
+                            {
+                                page.data.authors.length > 0 && (
+                                    <div class="authors">
+                                        {page.data.authors.map((author) => {
+                                            const linkedAuthor = people.find(
+                                                (p) => p.id === author._id,
+                                            );
+                                            return (
+                                                <ContactAvatar
+                                                    person={linkedAuthor}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                )
+                            }
+                            {
+                                page.data.publishDate && (
+                                    <div class="dates">
+                                        <p>
+                                            <strong>Published on</strong>{' '}
+                                            <time
+                                                datetime={page.data.publishDate}
+                                            >
+                                                {format(
+                                                    page.data.publishDate,
+                                                    'long',
+                                                )}
+                                            </time>
+                                            {page.data.revisedDate && (
+                                                <span>
+                                                    ,{' '}
+                                                    <strong>revised on </strong>{' '}
+                                                    <time
+                                                        datetime={
+                                                            page.data
+                                                                .revisedDate
+                                                        }
+                                                    >
+                                                        {format(
+                                                            page.data
+                                                                .revisedDate,
+                                                            'long',
+                                                        )}
+                                                    </time>
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
+                                )
+                            }
+                        </div>
+                    </section>
+                    <section class="suggested-citation">
+                        <div class="small-title" id="citation">
+                            Suggested Citation
+                        </div>
+                        <Fragment
+                            set:html={getPlaceCitation(
+                                articleAuthors,
+                                page.data.title,
+                                `${Astro.site?.href}sites/${page.data.placeID}`,
+                                page.data.publishDate,
+                                page.data.revisedDate,
+                            )}
+                        />
+                    </section>
+                </div>
+            </div>
+            <div class="sidebar-panel">
+                <div class="sidebar-elements">
+                    {
+                        page.data.articleContent && (
+                            <PlacesArticleTOC
+                                blocks={page.data.articleContent?.blocks}
+                                historicalPeriods={
+                                    page.data.historicalPeriods.length
+                                }
+                            />
+                        )
+                    }
+                    <ShareLinks title={page.data.title} />
+                </div>
+            </div>
+        </article>
+    </div>
+</PageWrapper>
+
+<script>
+    import 'mapbox-gl/dist/mapbox-gl.css';
+    import mapboxgl from 'mapbox-gl';
+
+    // get place coordinates
+    type Coords = {
+        _type: string;
+        lat: number;
+        lng: number;
+    };
+
+    const coordinatesRaw =
+        document.querySelector<HTMLElement>('.map-wrapper')?.dataset
+            .coordinates;
+    let coordinates: Coords | undefined = undefined;
+    if (coordinatesRaw) {
+        coordinates = JSON.parse(coordinatesRaw);
+    }
+
+    const map = new mapboxgl.Map({
+        accessToken:
+            'pk.eyJ1IjoiZHRzYXVuZGVycy11Y2xhIiwiYSI6ImNtbnhvbXZvNzA0YmsycHE1eTIyOG16dHEifQ.avl_JBDSM0Iulkp2TxYj3A',
+        container: 'map',
+        zoom: 14,
+        style: 'mapbox://styles/mapbox/standard-satellite',
+        center: coordinates,
+        // config: {
+        //     basemap: {
+        //     },
+        // },
+        cooperativeGestures: true,
+    });
+
+    if (coordinates) {
+        const marker = new mapboxgl.Marker().setLngLat(coordinates).addTo(map);
+    }
+
+    // get select menu items
+    const select = document.querySelector<HTMLSelectElement>('#style-switcher');
+    select?.addEventListener('change', (e: Event) => {
+        map.setStyle(
+            `mapbox://styles/mapbox/${(e.target as HTMLInputElement).value}`,
+        );
+    });
+</script>
+
+<style>
+    .place {
+        margin-block-start: var(--space-2xl);
+    }
+
+    :global(.place .sidebar-elements > * + *) {
+        margin-block-start: var(--space-xl);
+    }
+
+    /*:global(.page[data-template='placesShow'] .rich-text) {
+        font-size: var(--step-0);
+    }
+
+    :global(.page[data-template='placesShow'] .rich-text h2) {
+        font-size: var(--step-3);
+    }
+
+    :global(.page[data-template='placesShow'] .rich-text h3) {
+        font-size: var(--step-2);
+    }
+
+    :global(.page[data-template='placesShow'] .rich-text :is(h2, h3) + *) {
+        --flow-space: var(--space-m);
+    } */
+    :global(.page[data-template='placesShow'] .rich-text h2) {
+        border-block-start: 1px solid var(--site-border);
+        padding-block-start: var(--space-m);
+    }
+
+    .with-sidebar {
+        --main-min-width: 57%;
+        --sidebar-gap: var(--space-3xl);
+        --sidebar-min-width: 20rem;
+    }
+
+    .sidebar-elements {
+        position: sticky;
+        top: var(--space-m);
+    }
+
+    .header {
+        & .description {
+            font-size: var(--step-1);
+        }
+
+        & .coordinates {
+            font-size: var(--step--1);
+            color: var(--site-text--light);
+            font-weight: 500;
+        }
+
+        & .categories {
+            margin-block-start: var(--space-m);
+        }
+    }
+
+    .persian-text {
+        text-align: left;
+        font-size: 1.75rem;
+    }
+
+    .map-wrapper {
+        margin-block-start: var(--space-xl);
+    }
+
+    #map {
+        min-height: 32rem;
+    }
+
+    .switcher-menu {
+        margin-block-end: 0.5rem;
+    }
+
+    .article-content {
+        margin-block-start: var(--space-2xl);
+    }
+
+    :global(.place .sidebar-panel .small-title) {
+        font-size: var(--step--1);
+        color: var(--ucla-primary-blue);
+        margin-block-end: var(--space-2xs);
+        padding-block-end: var(--space-3xs);
+        border-block-end: 1px solid var(--site-border);
+    }
+
+    .historical-periods {
+        margin-block-end: var(--space-2xl);
+
+        & .items {
+            margin-block-start: var(--space-l);
+        }
+    }
+
+    .article-footer {
+        border-block-start: 1px solid var(--ucla-gray-6);
+        margin-block-start: var(--space-xl);
+        padding-block-start: var(--space-m);
+
+        & > * + * {
+            margin-block-start: var(--space-l);
+        }
+
+        & .small-title {
+            font-size: var(--step--1);
+            color: var(--ucla-primary-blue);
+            margin-block-end: var(--space-xs);
+        }
+
+        & .cluster {
+            --cluster-justify: space-between;
+            --cluster-space: 1rem;
+        }
+    }
+
+    :global(.article-footer .citation) {
+        padding: 1rem;
+        background: var(--ucla-gray-2);
+    }
+</style>

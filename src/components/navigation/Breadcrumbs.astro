@@ -17,10 +17,8 @@ interface Props {
 const { style = 'default', collection = 'pages' } = Astro.props;
 
 const pages = await getCollection('pages');
-const events = await getCollection('events');
-const eventCategories = await getCollection('eventCategories');
-const videos = await getCollection('videos');
 const people = await getCollection('people');
+const places = await getCollection('places');
 // const publications = await getCollection('publications');
 const posts = await getCollection('posts');
 const postCategories = await getCollection('postCategories');
@@ -56,20 +54,9 @@ for (let i = 0; i < urlParts.length; i++) {
         breadcrumb.ariaCurrent = 'page';
 
         switch (collection) {
-            case 'events':
-                breadcrumb.title = events.find(
-                    ({ data }) => data.slug == currentHref,
-                )?.data.title;
-                break;
-            case 'eventCategories':
-                breadcrumb.title = eventCategories.find(
-                    ({ data }) =>
-                        `/events/categories${data.slug}` == currentHref,
-                )?.data.title;
-                break;
-            case 'videos':
-                breadcrumb.title = videos.find(
-                    ({ data }) => `/media${data.slug}` == currentHref,
+            case 'places':
+                breadcrumb.title = places.find(
+                    (entry) => `/sites/${entry.data.placeID}` == currentHref,
                 )?.data.title;
                 break;
             case 'people':
@@ -108,9 +95,12 @@ for (let i = 0; i < urlParts.length; i++) {
         }
     } else {
         // search pages for title
-        breadcrumb.title = pages.find(
-            ({ data }) => data.slug == currentHref,
-        )?.data.title;
+        const page = pages.find(({ data }) => data.slug == currentHref);
+        if (page?.id === '1c99a5b9-7650-47fe-afa9-a4bb91d29f81') {
+            breadcrumb.title = 'Sites';
+        } else {
+            breadcrumb.title = page?.data.title;
+        }
     }
 
     // fallback if no title found

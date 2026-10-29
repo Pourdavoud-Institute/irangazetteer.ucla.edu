@@ -1,0 +1,19 @@
+---
+import type { MarkProps } from 'astro-portabletext/types';
+import v from 'voca';
+
+type Props = MarkProps<never>;
+
+const props = Astro.props;
+
+// TODO: harden this
+const { markDef, children, _type } = props.node;
+// console.log(children);
+// console.log(markDef);
+---
+
+{
+    children.map((child) => (
+        <a href={`#${v.slugify(markDef.title)}`}>{child.text}</a>
+    ))
+}

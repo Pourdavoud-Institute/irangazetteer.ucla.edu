@@ -5,10 +5,8 @@ import type { CollectionEntry } from 'astro:content';
 import ColumnsGroup from '@components/modules/ColumnsGroup.astro';
 // import CollectionList from '@components/modules/CollectionList.astro';
 import DisclosureSet from '@components/modules/DisclosureSet.astro';
-import EventsPreviewList from '@components/modules/EventsPreviewList.astro';
 import Gallery from '@components/modules/Gallery.astro';
 import PeopleList from '@components/modules/PeopleList.astro';
-import PodcastFeed from '@components/modules/PodcastFeed.astro';
 import PostsList from '@components/modules/PostsList.astro';
 import RelatedLinks from '@components/modules/RelatedLinks.astro';
 import RichText from '@components/modules/RichText.astro';
@@ -36,16 +34,12 @@ const { modules } = Astro.props;
                     return <DisclosureSet module={module} />;
                 case 'columnsGroup':
                     return <ColumnsGroup module={module} />;
-                case 'eventsPreviewList':
-                    return <EventsPreviewList module={module} />;
                 case 'featuredElement':
                     return <TextImageDiptych module={module} />;
                 case 'gallery':
                     return <Gallery module={module} />;
                 case 'peopleList':
                     return <PeopleList module={module} />;
-                case 'podcastFeed':
-                    return <PodcastFeed module={module} />;
                 case 'postsList':
                     return <PostsList module={module} />;
                 case 'relatedLinks':

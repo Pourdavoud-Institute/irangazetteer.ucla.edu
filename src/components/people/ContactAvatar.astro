@@ -1,0 +1,47 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SanityImage from '@components/SanityImage.astro';
+
+interface Props {
+    person?: CollectionEntry<'people'>;
+}
+
+const { person } = Astro.props;
+---
+
+{
+    person && (
+        <article class="contact-avatar">
+            {person.data.image && (
+                <SanityImage
+                    aspectRatio={[1, 1]}
+                    classes="avatar"
+                    source={person.data.image}
+                    width={160}
+                />
+            )}
+            {person.data.affiliation === 'ucla' ? (
+                <a href={person.data.slug}>{person.data.title}</a>
+            ) : (
+                <p>
+                    <strong>{person.data.title}</strong>
+                </p>
+            )}
+        </article>
+    )
+}
+
+<style>
+    .contact-avatar {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 4rem;
+        height: 4rem;
+        object-fit: cover;
+        border-radius: 999px;
+    }
+</style>

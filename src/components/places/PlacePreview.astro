@@ -1,0 +1,83 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import SanityImage from '@components/SanityImage.astro';
+
+interface Props {
+    place: CollectionEntry<'places'>;
+    HeadingLevel?: 'h2' | 'h3';
+}
+
+const { HeadingLevel = 'h2', place } = Astro.props;
+---
+
+<article class="card place-preview">
+    <a
+        class="image-wrapper | frame image-scale-in"
+        href={`/sites/${place.data.placeID}`}
+    >
+        {
+            place.data.featuredImage ? (
+                <SanityImage
+                    aspectRatio={[3, 2]}
+                    classes="img"
+                    source={place.data.featuredImage}
+                    width={600}
+                />
+            ) : (
+                <img
+                    alt=""
+                    class="img"
+                    height="600"
+                    src="/images/pourdavoud-placeholder-landscape.webp"
+                    width="800"
+                />
+            )
+        }
+    </a>
+    <div class="text-wrapper | flow" data-tempo="prestissimo">
+        <HeadingLevel class="title">
+            <a class="title-link" href={`/sites/${place.data.placeID}`}
+                >{place.data.title}</a
+            >
+        </HeadingLevel>
+        {
+            place.data.persianName && (
+                <p class="persian-text" dir="rtl">
+                    {place.data.persianName}
+                </p>
+            )
+        }
+        <p class="description">{place.data.locationDescription}</p>
+    </div>
+</article>
+
+<style>
+    /* .place-preview {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    } */
+
+    .title {
+        font-size: var(--step-2);
+        font-weight: 700;
+    }
+
+    .image-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .img {
+        aspect-ratio: 3/2;
+        object-fit: cover;
+    }
+
+    .persian-text {
+        text-align: left;
+    }
+
+    .description {
+        --flow-space: var(--space-s);
+    }
+</style>

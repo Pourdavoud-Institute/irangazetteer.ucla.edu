@@ -17,13 +17,7 @@ interface Props {
     og?: OGBlock;
     structuredData?: Record<string, any>;
     filterType?:
-        | 'category'
-        | 'event'
-        | 'page'
-        | 'person'
-        | 'post'
-        | 'publication'
-        | 'video'; // the resource type for constructing pagefind index filters
+        'category' | 'page' | 'person' | 'place' | 'post' | 'publication'; // the resource type for constructing pagefind index filters
 }
 
 const {

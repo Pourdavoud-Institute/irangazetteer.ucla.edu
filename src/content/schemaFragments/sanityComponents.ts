@@ -65,7 +65,7 @@ export const PersonSpeaker = z.object({
 
 export type PersonSpeaker = z.infer<typeof PersonSpeaker>;
 
-export const RichTextBlocks = z.nullable(z.array(z.any()));
+export const RichTextBlocks = z.array(z.any());
 
 export type RichTextBlocks = z.infer<typeof RichTextBlocks>;
 

@@ -1,20 +1,40 @@
 ---
 /** Custom Block component that overrides default rendering for select styles. */
 import type { BlockProps } from 'astro-portabletext/types';
-import RichTextH2 from './RichTextH2.astro';
+import type { FigureImage } from '@lib/utils/types';
+import RichTextFigureGallery from './RichTextFigureGallery.astro';
 import { usePortableText } from 'astro-portabletext';
+import v from 'voca';
 
 type Props = BlockProps;
 
 const props = Astro.props;
+
+const { markDefs, children, style } = props.node;
 const { getDefaultComponent } = usePortableText(props.node);
 
 let Block = getDefaultComponent();
 
-// override h2 style to add slugified ID
-if (props.node.style == 'h2') {
-    Block = RichTextH2;
-}
+const Tag = style;
+const heading = children[0].text;
+// console.log(markDefs);
+const hasFigures = markDefs?.some((el) => el._type == 'figure_ref');
 ---
 
-<Block {...props}><slot /></Block>
+{
+    ['h2', 'h3'].includes(style) ? (
+        // @ts-expect-error
+        <Tag id={heading && v.slugify(heading)}>
+            <slot />
+        </Tag>
+    ) : (
+        <Block {...props}>
+            <slot />
+        </Block>
+    )
+}
+{
+    hasFigures && (
+        <RichTextFigureGallery images={markDefs as unknown as FigureImage[]} />
+    )
+}

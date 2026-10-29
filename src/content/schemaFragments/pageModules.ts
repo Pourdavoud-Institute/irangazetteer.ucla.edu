@@ -86,13 +86,7 @@ const PeopleList = z.object({
     heading: z.string().nullish(),
     selection: z.union([z.literal('auto'), z.literal('manual')]),
     // people category IDs
-    filter: z.enum([
-        'all',
-        categories.staff.id,
-        categories.faculty.id,
-        categories.affiliate.id,
-        categories.gradStudent.id,
-    ]),
+    filter: z.enum(['all', categories.staff.id, categories.faculty.id]),
     entries: z.array(
         z.object({
             _id: z.string(),
@@ -178,18 +172,6 @@ const DisclosureSet = z.object({
 });
 
 export type DisclosureSet = z.infer<typeof DisclosureSet>;
-
-/** EVENTS PREVIEW LIST */
-const EventsPreviewList = z.object({
-    _type: z.literal('eventsPreviewList'),
-    showUpcoming: z.boolean(),
-    showPast: z.boolean(),
-    options: z.object({
-        sectionMargin: z.boolean().nullish(),
-    }),
-});
-
-export type EventsPreviewList = z.infer<typeof EventsPreviewList>;
 
 /** FEATURED ELEMENT */
 const FeaturedElement = z.object({
@@ -298,7 +280,6 @@ export const PageModules = z.array(
         CollectionList,
         ColumnsGroup,
         DisclosureSet,
-        EventsPreviewList,
         FeaturedElement,
         Gallery,
         HeroBanner,

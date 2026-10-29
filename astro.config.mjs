@@ -7,7 +7,7 @@ import vue from '@astrojs/vue';
 
 // https://astro.build/config
 export default defineConfig({
-    site: 'https://globalantiquity.ucla.edu',
+    site: 'https://irangazetteer.ucla.edu',
 
     integrations: [sitemap(), vue()],
 
@@ -28,8 +28,8 @@ export default defineConfig({
         },
     },
 
-    redirects: {
-        '/media': '/media/video-library',
-        '/media/videos': '/media/video-library',
-    },
+    // redirects: {
+    //     '/media': '/media/video-library',
+    //     '/media/videos': '/media/video-library',
+    // },
 });

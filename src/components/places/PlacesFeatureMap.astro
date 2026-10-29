@@ -1,0 +1,238 @@
+---
+// TODO: implement filtering by search/text input and category select
+// @link https://docs.mapbox.com/mapbox-gl-js/example/filter-markers-by-input/
+// @link https://docs.mapbox.com/mapbox-gl-js/example/filter-markers/
+---
+
+<div class="map-wrapper">
+    <div id="map"></div>
+</div>
+
+<script>
+    import 'mapbox-gl/dist/mapbox-gl.css';
+    import htm from 'htm';
+    import mapboxgl from 'mapbox-gl';
+    import vhtml from 'vhtml';
+
+    const html = htm.bind(vhtml);
+
+    const mapWrapper = document.querySelector<HTMLElement>('.map-wrapper');
+
+    const map = new mapboxgl.Map({
+        accessToken:
+            'pk.eyJ1IjoiZHRzYXVuZGVycy11Y2xhIiwiYSI6ImNtbnhvbXZvNzA0YmsycHE1eTIyOG16dHEifQ.avl_JBDSM0Iulkp2TxYj3A',
+        container: 'map',
+        zoom: 4.5,
+        center: [50.1, 32.5],
+        style: 'mapbox://styles/dtsaunders-ucla/cmvsmoms1003a01rm27oa8eap',
+        projection: 'mercator',
+        cooperativeGestures: true,
+    });
+
+    map.on('load', () => {
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.ScaleControl());
+
+        // add extra tilesets
+        // map.addSource('cawm-tileset', {
+        //     type: 'raster',
+        //     tiles: ['https://cawm.lib.uiowa.edu/tiles/{z}/{x}/{y}.png'],
+        //     tileSize: 256,
+        //     attribution: '© Consortium of Ancient World Mappers',
+        // });
+        // map.addLayer({
+        //     id: 'cawm-tileset-layer',
+        //     type: 'raster',
+        //     source: 'cawm-tileset',
+        // });
+
+        // add places source
+        // const mapCollection = JSON.parse(mapWrapper!.dataset.places!);
+        map.addSource('places', {
+            type: 'geojson',
+            generateId: true,
+            data: `/sites/index.geojson`,
+            cluster: true,
+            clusterMaxZoom: 8,
+            clusterRadius: 50,
+        });
+
+        // add layers
+        map.addLayer({
+            id: 'places-cluster',
+            type: 'circle',
+            source: 'places',
+            filter: ['has', 'point_count'],
+            paint: {
+                // Use step expressions (https://docs.mapbox.com/style-spec/reference/expressions/#step)
+                // with three steps to implement three types of circles:
+                //   * Blue, 20px circles when point count is less than 100
+                //   * Yellow, 30px circles when point count is between 100 and 750
+                //   * Pink, 40px circles when point count is greater than or equal to 750
+                'circle-color': [
+                    'step',
+                    ['get', 'point_count'],
+                    '#005587',
+                    20,
+                    '#003B5C',
+                    50,
+                    '#003B5C',
+                ],
+                'circle-radius': [
+                    'step',
+                    ['get', 'point_count'],
+                    20,
+                    20,
+                    30,
+                    50,
+                    40,
+                ],
+                'circle-emissive-strength': 1,
+            },
+        });
+        map.addLayer({
+            id: 'places-cluster-count',
+            type: 'symbol',
+            source: 'places',
+            filter: ['has', 'point_count'],
+            layout: {
+                'text-field': ['get', 'point_count_abbreviated'],
+                'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+                'text-size': 14,
+            },
+            paint: {
+                'text-color': 'white',
+            },
+        });
+        map.addLayer({
+            id: 'places-layer',
+            type: 'circle',
+            source: 'places',
+            filter: ['!', ['has', 'point_count']],
+            paint: {
+                'circle-color': '#2774ae',
+                'circle-stroke-color': 'white',
+                'circle-stroke-width': 1,
+                'circle-radius': 7,
+            },
+        });
+
+        // add cluster interaction
+        map.addInteraction('click-clusters', {
+            type: 'click',
+            target: { layerId: 'places-cluster' },
+            handler: (e) => {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ['places-cluster'],
+                });
+                console.log(features);
+                // @ts-expect-error
+                const clusterId = features[0].properties.cluster_id;
+                // @ts-expect-error
+                map.getSource('places')?.getClusterExpansionZoom(
+                    clusterId,
+                    (err: any, zoom: any) => {
+                        if (err) return;
+
+                        map.easeTo({
+                            // @ts-expect-error
+                            center: features[0].geometry.coordinates,
+                            zoom,
+                        });
+                    },
+                );
+            },
+        });
+
+        // add info popups
+        map.addInteraction('places-click-interaction', {
+            type: 'click',
+            target: { layerId: 'places-layer' },
+            handler: (e) => {
+                const coordinates = e.feature?.geometry.coordinates.slice();
+                const description = html`
+                    <div
+                        class="mapbox-popup__box | flow"
+                        data-placeID="${e.feature?.properties.place_id}"
+                        data-tempo="presto"
+                    >
+                        <header>
+                            <p class="mapbox-popup__title">
+                                ${e.feature?.properties.title}
+                            </p>
+                            <p class="persian-text" dir="rtl">
+                                ${e.feature?.properties.persian_name}
+                            </p>
+                        </header>
+                        <p>${e.feature?.properties.description}</p>
+                        <a
+                            class="button-link"
+                            data-style="primary"
+                            data-size="small"
+                            href="/sites/${e.feature?.properties.place_id}"
+                            >View Article</a
+                        >
+                    </div>
+                `;
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(description as string)
+                    .addTo(map);
+            },
+        });
+
+        // change cursor to pointer when mouse is over cluster
+        map.addInteraction('clusters-mouseenter-interaction', {
+            type: 'mouseenter',
+            target: { layerId: 'places-cluster' },
+            handler: () => {
+                map.getCanvas().style.cursor = 'pointer';
+            },
+        });
+
+        // change cursor back to pointer when mouse leaves cluster
+        map.addInteraction('clusters-mouseleave-interaction', {
+            type: 'mouseleave',
+            target: { layerId: 'places-cluster' },
+            handler: () => {
+                map.getCanvas().style.cursor = '';
+            },
+        });
+
+        // change cursor to pointer when the mouse is over a popup
+        map.addInteraction('places-mouseenter-interaction', {
+            type: 'mouseenter',
+            target: { layerId: 'places-layer' },
+            handler: () => {
+                map.getCanvas().style.cursor = 'pointer';
+            },
+        });
+        // change cursor back to pointer when the mouse leaves a popup
+        map.addInteraction('places-mouseleave-interaction', {
+            type: 'mouseleave',
+            target: { layerId: 'places-layer' },
+            handler: () => {
+                map.getCanvas().style.cursor = '';
+            },
+        });
+    });
+    map.on('dragend', () => {
+        console.log('MAP CENTER', map.getCenter());
+        console.log('MAP ZOOM', map.getZoom());
+    });
+</script>
+
+<style>
+    .map-wrapper {
+        aspect-ratio: 21/9;
+        width: 100%;
+        height: auto;
+        padding: var(--gutter-spacing);
+        padding-block-end: 0;
+    }
+
+    #map {
+        height: 100%;
+    }
+</style>

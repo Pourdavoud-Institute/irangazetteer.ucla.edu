@@ -1,0 +1,11 @@
+.mapbox-popup__box {
+    & .button-link {
+        padding: 3px 9px;
+    }
+}
+
+.mapbox-popup__title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-heading-weight);
+    font-size: var(--step-1);
+}

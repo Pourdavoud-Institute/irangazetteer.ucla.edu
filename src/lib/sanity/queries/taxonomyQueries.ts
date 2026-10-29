@@ -1,16 +1,17 @@
 import groq from 'groq';
 
-const EVENT_CATEGORIES_EVENT_SUBQUERY = groq`*[_type == "event" && references(^._id)] | order(eventDetails.date.startDate desc) {
+const PLACE_CATEGORIES_PLACE_SUBQUERY = groq`*[_type == "place" && references(^._id)] {
     _id
 }`;
 
-export const EVENT_CATEGORIES_QUERY = groq`*[_type == "eventCategory"] {
+export const PLACE_CATEGORIES_QUERY = groq`*[_type == "placeCategory"] {
     _id,
     _type,
     title,
     "slug": slug.current,
-    "events": coalesce(
-        ${EVENT_CATEGORIES_EVENT_SUBQUERY},
+    "description": coalesce(description[], []),
+    "places": coalesce(
+        ${PLACE_CATEGORIES_PLACE_SUBQUERY},
         []
     )
 }`;

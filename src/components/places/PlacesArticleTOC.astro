@@ -1,0 +1,56 @@
+---
+import v from 'voca';
+
+interface Props {
+    blocks: {
+        _key: string;
+        _type: string;
+        children: any[];
+        markDefs: any[];
+        style: string;
+    }[];
+    historicalPeriods: number;
+}
+
+const { blocks, historicalPeriods } = Astro.props;
+
+const tocItems: { heading: string; href: string }[] = [];
+
+// TODO: include h3 as subset of h2
+for (const block of blocks) {
+    if (['h2'].includes(block.style)) {
+        if (block.children.length) {
+            const text = block.children[0].text;
+            tocItems.push({ heading: text, href: v.slugify(text) });
+        }
+    }
+}
+---
+
+{
+    tocItems.length > 0 && (
+        <div class="article-toc">
+            <div class="small-title">Table of Contents</div>
+            <nav>
+                <ul class="flow" data-tempo="prestissimo">
+                    <li>
+                        <a href="#map">Map</a>
+                    </li>
+                    {historicalPeriods > 0 && (
+                        <li>
+                            <a href="#historical-periods">Historical Periods</a>
+                        </li>
+                    )}
+                    {tocItems.map((item) => (
+                        <li>
+                            <a href={`#${item.href}`}>{item.heading}</a>
+                        </li>
+                    ))}
+                    <li>
+                        <a href="#citation">Citation</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    )
+}

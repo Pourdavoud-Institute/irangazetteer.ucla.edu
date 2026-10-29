@@ -1,7 +1,8 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { type CollectionEntry, getCollection } from 'astro:content';
 import HeroCover from '@components/modules/HeroCover.astro';
 import ModulesList from '@components/document/ModulesList.astro';
+import PlacesFeatureMap from '@components/places/PlacesFeatureMap.astro';
 
 interface Props {
     page: CollectionEntry<'pages'>;
@@ -11,9 +12,12 @@ const { page } = Astro.props;
 
 // filter out hero cover section
 const heroCover = page.data.modules.find(
-    (module) => module._type == 'heroCover'
+    (module) => module._type == 'heroCover',
 );
+
+const places = await getCollection('places');
 ---
 
 {heroCover && <HeroCover module={heroCover} />}
+<PlacesFeatureMap />
 {page.data.modules && <ModulesList modules={page.data.modules} />}

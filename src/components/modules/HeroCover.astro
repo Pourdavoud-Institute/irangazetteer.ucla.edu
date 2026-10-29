@@ -16,7 +16,9 @@ const { module } = Astro.props;
     <header>
         <div class="content-wrapper">
             <div class="text-wrapper">
-                <p class="small-title eyebrow">UCLA Cunard Center</p>
+                <p class="small-title eyebrow">
+                    Online Encyclopedia of Iranian Archaeological Sites
+                </p>
                 <h1 class="mega-title boxed">{module.heading}</h1>
                 <!-- <div class="scroll-link">
                     <a
@@ -71,36 +73,6 @@ const { module } = Astro.props;
                                         </div>
                                     </div>
                                 </article>;
-                            } else if (footerItem._type === 'event') {
-                                const reference = await getEntry(
-                                    'events',
-                                    footerItem._id,
-                                );
-                                if (reference) {
-                                    return (
-                                        <article class="hero-footer-item">
-                                            <a
-                                                class="flow | item-wrapper"
-                                                data-tempo="vivace"
-                                                href={`/events/${reference.data.slug}`}
-                                            >
-                                                <p class="heading">
-                                                    {reference.data.title}
-                                                </p>
-                                                {reference.data.preview && (
-                                                    <div class="summary">
-                                                        <RichTextBlocksLite
-                                                            blocks={
-                                                                reference.data
-                                                                    .preview
-                                                            }
-                                                        />
-                                                    </div>
-                                                )}
-                                            </a>
-                                        </article>
-                                    );
-                                }
                             } else if (footerItem._type === 'post') {
                                 const reference = await getEntry(
                                     'posts',

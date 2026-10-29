@@ -1,6 +1,6 @@
-# Global Antiquity Website (Front-end)
+# Iran Gazetteer Website (Front-end)
 
-This repository contains the front-end code (HTML, CSS, and JavaScript) for the [UCLA Global Antiquity](https://globalantiquity.ucla.edu/) website, part of the UCLA College [Division of Humanities](https://humanities.ucla.edu/). Serving as the "presentation layer" of a "headless" architecture, the codebase uses the Node.js-based Astro web framework to prerender a static site via a build step. The "content layer" is handled separately in a [Sanity Studio app](https://github.com/ucla-global-antiquity/sanity-studio) and is exposed to the front-end via a query language API.
+This repository contains the front-end code (HTML, CSS, and JavaScript) for the [Archaeological Gazetteer of Iran](irangazetteer.ucla.edu) website, a project of the [UCLA Pourdavoud Institute](https://pourdavoud.ucla.edu/). Serving as the "presentation layer" of a "headless" architecture, the codebase uses the Node.js-based Astro web framework to prerender a static site via a build step. The "content layer" is handled separately in a [Sanity Studio app](https://github.com/Pourdavoud-Institute/iran-gazetteer-sanity-studio) and is exposed to the front-end via a query language API.
 
 Use this project to make changes to template files, add new site integrations, or set up a local development environment for testing features / fixes.
 

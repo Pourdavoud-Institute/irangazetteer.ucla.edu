@@ -54,7 +54,7 @@ export const pages = defineCollection({
         modules: PageModules,
         index: z
             .object({
-                collection: z.enum(['events', 'videos', 'posts']),
+                collection: z.enum(['places', 'historicalPeriods', 'posts']),
             })
             .nullish(),
         people: z

@@ -31,6 +31,7 @@
 @import 'components/filter-link.css' layer(main);
 @import 'components/filters.css' layer(main);
 @import 'components/footer-link.css' layer(main);
+@import 'components/mapbox-popup.css' layer(main);
 @import 'components/nav-link.css' layer(main);
 @import 'components/on-page-nav.css' layer(main);
 @import 'components/popover.css' layer(main);
