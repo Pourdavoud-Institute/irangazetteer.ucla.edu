@@ -28,14 +28,18 @@ export const getPlaceCitation = (
             }
         }
     }
-    citation += `${authorsSegment}, “${title},” <em>Archaeological Gazetteer of Iran</em>,`;
+    if (!authors.length) {
+        citation += `“${title},” <em>Archaeological Gazetteer of Iran</em>,`;
+    } else {
+        citation += `${authorsSegment}, “${title},” <em>Archaeological Gazetteer of Iran</em>,`;
+    }
     if (publishDate) {
-        citation += ` ${format(publishDate, 'long')}`;
+        citation += ` ${format(publishDate, 'long')},`;
     }
     if (revisedDate) {
-        citation += ` (revised ${format(revisedDate, 'long')})`;
+        citation += ` (revised ${format(revisedDate, 'long')}),`;
     }
-    citation += `, ${permalink}.`;
+    citation += ` ${permalink}.`;
 
     return citation;
 };

@@ -1,29 +1,78 @@
 ---
+import { getCollection } from 'astro:content';
+import v from 'voca';
 // TODO: implement filtering by search/text input and category select
 // @link https://docs.mapbox.com/mapbox-gl-js/example/filter-markers-by-input/
 // @link https://docs.mapbox.com/mapbox-gl-js/example/filter-markers/
+
+const historicalPeriods = await getCollection('historicalPeriods');
 ---
 
 <div class="map-wrapper">
     <div id="map"></div>
+    <div class="filters">
+        <fieldset class="filter-group | periods-filter">
+            <legend>Filter by Historical Period:</legend>
+            {
+                historicalPeriods
+                    .sort((a, b) => (a.data.title > b.data.title ? 1 : -1))
+                    .map((period) => {
+                        const titleSlug = v.slugify(period.data.title);
+                        return (
+                            <div class="checkbox-group">
+                                <input
+                                    id={titleSlug}
+                                    name={titleSlug}
+                                    type="checkbox"
+                                />
+                                <label for={titleSlug}>
+                                    {period.data.title}
+                                </label>
+                            </div>
+                        );
+                    })
+            }
+        </fieldset>
+    </div>
 </div>
 
 <script>
     import 'mapbox-gl/dist/mapbox-gl.css';
     import htm from 'htm';
     import mapboxgl from 'mapbox-gl';
+    import v from 'voca';
     import vhtml from 'vhtml';
 
     const html = htm.bind(vhtml);
 
+    type Feature = {
+        type: 'Feature';
+        geometry: {
+            type: 'Point';
+            coordinates: [number, number];
+        };
+        properties: Record<string, any>;
+    };
+
     const mapWrapper = document.querySelector<HTMLElement>('.map-wrapper');
+    const periodFilters = document.querySelectorAll<HTMLInputElement>(
+        '.periods-filter input',
+    );
+
+    // fetch all features to filter and reload map using `setData()`
+    const allFeatures: Feature[] = [];
+    fetch('/sites/index.geojson')
+        .then((res) => res.json())
+        .then((data) => {
+            allFeatures.push(...data.features);
+        });
 
     const map = new mapboxgl.Map({
         accessToken:
             'pk.eyJ1IjoiZHRzYXVuZGVycy11Y2xhIiwiYSI6ImNtbnhvbXZvNzA0YmsycHE1eTIyOG16dHEifQ.avl_JBDSM0Iulkp2TxYj3A',
         container: 'map',
         zoom: 4.5,
-        center: [50.1, 32.5],
+        center: [48.3, 32.5],
         style: 'mapbox://styles/dtsaunders-ucla/cmvsmoms1003a01rm27oa8eap',
         projection: 'mercator',
         cooperativeGestures: true,
@@ -46,8 +95,7 @@
         //     source: 'cawm-tileset',
         // });
 
-        // add places source
-        // const mapCollection = JSON.parse(mapWrapper!.dataset.places!);
+        // add places source starting data - fetch URL
         map.addSource('places', {
             type: 'geojson',
             generateId: true,
@@ -58,6 +106,7 @@
         });
 
         // add layers
+        // 1. cluster circles
         map.addLayer({
             id: 'places-cluster',
             type: 'circle',
@@ -66,9 +115,6 @@
             paint: {
                 // Use step expressions (https://docs.mapbox.com/style-spec/reference/expressions/#step)
                 // with three steps to implement three types of circles:
-                //   * Blue, 20px circles when point count is less than 100
-                //   * Yellow, 30px circles when point count is between 100 and 750
-                //   * Pink, 40px circles when point count is greater than or equal to 750
                 'circle-color': [
                     'step',
                     ['get', 'point_count'],
@@ -90,6 +136,7 @@
                 'circle-emissive-strength': 1,
             },
         });
+        // 2. cluster counts
         map.addLayer({
             id: 'places-cluster-count',
             type: 'symbol',
@@ -104,6 +151,7 @@
                 'text-color': 'white',
             },
         });
+        // 3. primary place points
         map.addLayer({
             id: 'places-layer',
             type: 'circle',
@@ -125,7 +173,6 @@
                 const features = map.queryRenderedFeatures(e.point, {
                     layers: ['places-cluster'],
                 });
-                console.log(features);
                 // @ts-expect-error
                 const clusterId = features[0].properties.cluster_id;
                 // @ts-expect-error
@@ -153,9 +200,21 @@
                 const description = html`
                     <div
                         class="mapbox-popup__box | flow"
-                        data-placeID="${e.feature?.properties.place_id}"
+                        data-placeID="${e.feature?.id}"
                         data-tempo="presto"
                     >
+                        ${
+                            e.feature?.properties.featured_image
+                                ? html`
+                                      <img
+                                          alt="${e.feature?.properties.title}"
+                                          src="${e.feature?.properties.featured_image}"
+                                          width="300"
+                                          height="200"
+                                      />
+                                  `
+                                : ''
+                        }
                         <header>
                             <p class="mapbox-popup__title">
                                 ${e.feature?.properties.title}
@@ -216,15 +275,64 @@
                 map.getCanvas().style.cursor = '';
             },
         });
+
+        // Filters fetched dataset in memory and uses `setData` to reassign filtered points. This reloads the map and clustering automatically. Prefer this to calling `setFilter` on layers since this only targets layers and not the source.
+        function filterPeriods() {
+            const checked = [...periodFilters]
+                .filter((el) => el.checked)
+                .map((el) => el.id);
+
+            const filtered = checked.length
+                ? allFeatures.filter((f) =>
+                      f.properties.historical_periods.some((p: string) =>
+                          checked.includes(v.slugify(p)),
+                      ),
+                  )
+                : allFeatures;
+
+            // @ts-expect-error
+            map.getSource('places').setData({
+                type: 'FeatureCollection',
+                features: filtered,
+            });
+        }
+
+        // filter listeners
+        periodFilters.forEach((filter) => {
+            filter.addEventListener('change', () => {
+                filterPeriods();
+                /*
+                const checked = [...periodFilters]
+                    .filter((el) => el.checked)
+                    .map((el) => el.id);
+
+                if (!checked.length) {
+                    map.setFilter('places-layer', null);
+                    return;
+                }
+
+                // use `any` (OR clause) to simulate JS `some` array overlap method
+                // swap with `all` to match every checked category
+                map.setFilter('places-layer', [
+                    'any',
+                    ...checked.map((id) => [
+                        'in',
+                        id,
+                        ['get', 'historical_periods'],
+                    ]),
+                ]);*/
+            });
+        });
     });
-    map.on('dragend', () => {
-        console.log('MAP CENTER', map.getCenter());
-        console.log('MAP ZOOM', map.getZoom());
-    });
+    // map.on('dragend', () => {
+    //     console.log('MAP CENTER', map.getCenter());
+    //     console.log('MAP ZOOM', map.getZoom());
+    // });
 </script>
 
 <style>
     .map-wrapper {
+        display: flex;
         aspect-ratio: 21/9;
         width: 100%;
         height: auto;
@@ -234,5 +342,10 @@
 
     #map {
         height: 100%;
+        width: 100%;
+    }
+
+    .filters {
+        order: -1;
     }
 </style>

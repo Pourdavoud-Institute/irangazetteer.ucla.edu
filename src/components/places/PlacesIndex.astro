@@ -11,8 +11,16 @@ const places = await getCollection('places');
         {
             places
                 .sort((a, b) => {
-                    const titleA = v.latinise(a.data.title);
-                    const titleB = v.latinise(b.data.title);
+                    const titleA = v
+                        .chain(a.data.title)
+                        .latinise()
+                        .slugify()
+                        .value();
+                    const titleB = v
+                        .chain(b.data.title)
+                        .latinise()
+                        .slugify()
+                        .value();
 
                     return titleA > titleB ? 1 : -1;
                 })
