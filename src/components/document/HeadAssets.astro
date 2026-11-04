@@ -56,7 +56,13 @@
 <!-- Preload assets -->
 <link
     as="image"
-    href="/images/logos/cunard-ga-logo-seal-UCLA.png"
+    href="/images/logos/gazetteer-logo_white.png"
+    rel="preload"
+    type="image/png"
+/>
+<link
+    as="image"
+    href="/images/logos/gazetteer-logo_default.png"
     rel="preload"
     type="image/png"
 />
@@ -90,16 +96,3 @@
 <script defer is:inline src="https://unpkg.com/alpinejs@3.15.3/dist/cdn.min.js"
 ></script>
 <!-- G4 Analytics Google tag (gtag.js) -->
-<script
-    async
-    is:inline
-    src="https://www.googletagmanager.com/gtag/js?id=G-BS0GMTVTNB"></script>
-<script is:inline>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-        dataLayer.push(arguments);
-    }
-    gtag('js', new Date());
-
-    gtag('config', 'G-BS0GMTVTNB');
-</script>

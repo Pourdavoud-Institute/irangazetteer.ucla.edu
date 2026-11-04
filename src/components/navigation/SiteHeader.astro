@@ -11,9 +11,9 @@ interface Props {
 const { style = 'default' } = Astro.props;
 
 // get main nav by id
-const mainNavigation = await getEntry(
+const secondaryNavigation = await getEntry(
     'navigation',
-    'ba0e7fc0-16db-4d2f-a40c-1fab6366437a',
+    '163ee699-40cb-4591-8f5c-0bc528cf9f95',
 );
 
 const featuredNavigation = await getEntry(
@@ -27,17 +27,17 @@ const featuredNavigation = await getEntry(
     <a class="skip-link | small-title text-step--1" href="#main-content">
         Skip to Content
     </a>
-    <MainNavigation navItems={mainNavigation?.data.items} />
+    <MainNavigation navItems={secondaryNavigation?.data.items} />
     <nav aria-label="Featured" class="nav-featured">
         <div class="logos | cluster">
             <a class="logo-link" href="/">
                 <img
-                    alt="UCLA Pourdavoud Institute logo"
+                    alt="Archaeological Gazetteer of Iran logo"
                     decoding="auto"
                     loading="eager"
                     src={style === 'transparent'
-                        ? '/images/logos/pourdavoud-logo-UCLA-white.svg'
-                        : '/images/logos/pourdavoud-logo-UCLA.svg'}
+                        ? '/images/logos/gazetteer-logo_white.png'
+                        : '/images/logos/gazetteer-logo_default.png'}
                     width="325"
                 />
             </a>
@@ -48,7 +48,7 @@ const featuredNavigation = await getEntry(
         />
         <MobileNavigation
             featuredNavItems={featuredNavigation?.data.items}
-            mainNavItems={mainNavigation?.data.items}
+            mainNavItems={secondaryNavigation?.data.items}
             style={style}
         />
     </nav>

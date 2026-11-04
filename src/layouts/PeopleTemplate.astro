@@ -1,8 +1,9 @@
 ---
 import { type CollectionEntry, getEntry } from 'astro:content';
 import DefaultHeader from '@components/pageHeaders/DefaultHeader.astro';
+import ModulesList from '@components/document/ModulesList.astro';
 import PersonPreview from '@components/people/PersonPreview.astro';
-import { SanityUCLADepartments } from '@lib/sanity/dicts';
+// import { SanityUCLADepartments } from '@lib/sanity/dicts';
 import SingleImageHeader from '@components/pageHeaders/SingleImageHeader.astro';
 import SplitPaneHeader from '@components/pageHeaders/SplitPaneHeader.astro';
 import { getBreadcrumbsStyleFromSlug } from '@lib/utils/getBreadcrumbsStyleFromSlug';
@@ -38,23 +39,23 @@ const people = await Promise.all(
 let filters: { title: string; key: string }[] = [];
 
 // create set of filters from what are actually attached to people - remove empty
-if (page.data.people?.filter === 'department') {
-    const peopleDepartments = new Set();
-    for (const person of people) {
-        if (person?.data.departments.length) {
-            for (const department of person?.data?.departments) {
-                peopleDepartments.add(department);
-            }
-        }
-    }
+// if (page.data.people?.filter === 'department') {
+//     const peopleDepartments = new Set();
+//     for (const person of people) {
+//         if (person?.data.departments.length) {
+//             for (const department of person?.data?.departments) {
+//                 peopleDepartments.add(department);
+//             }
+//         }
+//     }
 
-    filters = Array.from(peopleDepartments)
-        .map((v) => ({
-            key: v as string,
-            title: SanityUCLADepartments[v as string],
-        }))
-        .sort((a, b) => (a.title < b.title ? -1 : 1));
-}
+//     filters = Array.from(peopleDepartments)
+//         .map((v) => ({
+//             key: v as string,
+//             title: SanityUCLADepartments[v as string],
+//         }))
+//         .sort((a, b) => (a.title < b.title ? -1 : 1));
+// }
 ---
 
 {
@@ -112,6 +113,7 @@ if (page.data.people?.filter === 'department') {
         }
     </div>
 </div>
+{page.data.modules.length > 0 && <ModulesList modules={page.data.modules} />}
 
 <style>
     .content-wrapper {

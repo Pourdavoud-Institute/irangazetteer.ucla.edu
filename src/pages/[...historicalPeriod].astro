@@ -1,0 +1,62 @@
+---
+import Breadcrumbs from '@components/navigation/Breadcrumbs.astro';
+import PageWrapper from '@components/document/PageWrapper.astro';
+import PlacesList from '@components/places/PlacesList.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+    const periods = await getCollection('historicalPeriods');
+    const places = await getCollection('places');
+
+    return periods.map((period) => ({
+        params: {
+            historicalPeriod: period.data.slug,
+        },
+        props: { period, places },
+    }));
+}
+
+const { period, places } = Astro.props;
+---
+
+<PageWrapper
+    footerMargin
+    id={period.id}
+    template="historicalPeriodsShow"
+    title={period.data.title}
+>
+    <Breadcrumbs collection="historicalPeriods" />
+    <div class="period | content-wrapper">
+        <header>
+            <div class="eyebrow small-title">Historical Period</div>
+            <h1>{period.data.title}</h1>
+        </header>
+        <div class="list-spacer">
+            <PlacesList
+                places={period.data.places.map((place) => {
+                    const linkedPlace = places.find((p) => p.id === place._id);
+                    if (linkedPlace) {
+                        return linkedPlace;
+                    }
+                })}
+            />
+        </div>
+        <div>
+            {period.data.places.map((place) => {})}
+        </div>
+    </div>
+</PageWrapper>
+
+<style>
+    .eyebrow {
+        font-size: var(--step--1);
+    }
+
+    .period {
+        margin-block-start: var(--space-2xl);
+    }
+
+    .list-spacer {
+        margin-block-start: var(--space-2xl);
+    }
+</style>

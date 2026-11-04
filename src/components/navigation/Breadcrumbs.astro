@@ -22,6 +22,7 @@ const places = await getCollection('places');
 // const publications = await getCollection('publications');
 const posts = await getCollection('posts');
 const postCategories = await getCollection('postCategories');
+const historicalPeriods = await getCollection('historicalPeriods');
 
 const urlParts = Astro.url.pathname.split('/').filter(Boolean);
 const breadcrumbs: Breadcrumb[] = [
@@ -85,6 +86,11 @@ for (let i = 0; i < urlParts.length; i++) {
             case 'postCategories':
                 breadcrumb.title = postCategories.find(
                     ({ data }) => `/news/categories${data.slug}` == currentHref,
+                )?.data.title;
+                break;
+            case 'historicalPeriods':
+                breadcrumb.title = historicalPeriods.find(
+                    ({ data }) => currentHref,
                 )?.data.title;
                 break;
             default:

@@ -21,26 +21,25 @@ const role = getPersonRole(person);
 
 // set link
 // only create for internal and grad students with `showPage` explicitly set
-if ((person.data.affiliation == "internal" || person.data.categories.find((c) => c?._id === categories.gradStudent.id)) && person.data.showPage) {
+if ((person.data.affiliation == "ucla" && person.data.showPage)) {
     link = person.data.slug;
     isInternal = true;
-} else if (person.data.facultyLink) {
-    link = person.data.facultyLink;
+} else if (person.data.externalLink) {
+    link = person.data.externalLink;
 }
 
-let departments = "";
-if (person.data.departments.length) {
-    departments = person.data.departments.join(",");
-} else {
-    departments = "-";
-}
+// let departments = "";
+// if (person.data.departments.length) {
+//     departments = person.data.departments.join(",");
+// } else {
+//     departments = "-";
+// }
 
 // remove `/` from category slugs to create ids for data attribute
 ---
 
 <article
     class:list={['person preview', { 'animate-in': withAnimate }]}
-    data-person-departments={departments}
     data-person-id={person.id}
     data-person-type={person.data.categories.map((category) => category?.slug.slice(1)).join(",")}
 >

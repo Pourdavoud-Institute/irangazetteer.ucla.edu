@@ -1,39 +1,10 @@
 ---
-import PlacePreview from './PlacePreview.astro';
+import PlacesList from '@components/places/PlacesList.astro';
 import { getCollection } from 'astro:content';
-import v from 'voca';
 
 const places = await getCollection('places');
 ---
 
 <div class="content-wrapper">
-    <ul class="places-list">
-        {
-            places
-                .sort((a, b) => {
-                    const titleA = v
-                        .chain(a.data.title)
-                        .latinise()
-                        .slugify()
-                        .value();
-                    const titleB = v
-                        .chain(b.data.title)
-                        .latinise()
-                        .slugify()
-                        .value();
-
-                    return titleA > titleB ? 1 : -1;
-                })
-                .map((place) => <PlacePreview place={place} />)
-        }
-    </ul>
+    <PlacesList places={places} />
 </div>
-
-<style>
-    .places-list {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        column-gap: var(--space-l);
-        row-gap: var(--space-2xl);
-    }
-</style>

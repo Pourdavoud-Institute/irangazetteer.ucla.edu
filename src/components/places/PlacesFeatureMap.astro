@@ -12,7 +12,7 @@ const historicalPeriods = await getCollection('historicalPeriods');
     <div id="map"></div>
     <div class="filters">
         <fieldset class="filter-group | periods-filter">
-            <legend>Filter by Historical Period:</legend>
+            <legend class="small-title">Filter by Period</legend>
             {
                 historicalPeriods
                     .sort((a, b) => (a.data.title > b.data.title ? 1 : -1))
@@ -347,5 +347,30 @@ const historicalPeriods = await getCollection('historicalPeriods');
 
     .filters {
         order: -1;
+        width: 12rem;
+        margin-inline-end: 1rem;
+    }
+
+    .periods-filter {
+        border: none;
+
+        & legend {
+            font-size: var(--step--1);
+            color: var(--ucla-primary-blue);
+            margin-block-end: 0.5rem;
+            padding-block-end: 0.5rem;
+            border-block-end: 1px solid var(--site-border);
+        }
+    }
+
+    .checkbox-group {
+        display: flex;
+        gap: 0.25rem;
+        font-size: var(--step--1);
+        margin-block-start: 0.25rem;
+
+        &:hover {
+            color: var(--ucla-primary-blue);
+        }
     }
 </style>
