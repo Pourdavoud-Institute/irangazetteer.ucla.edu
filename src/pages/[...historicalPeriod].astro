@@ -1,7 +1,9 @@
 ---
 import Breadcrumbs from '@components/navigation/Breadcrumbs.astro';
+import DetailsFilter from '@components/interactive/DetailsFilter.astro';
 import PageWrapper from '@components/document/PageWrapper.astro';
 import PlacesList from '@components/places/PlacesList.astro';
+import { formatPeriodDate } from '@lib/utils/formatPeriodDate';
 import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -12,11 +14,11 @@ export async function getStaticPaths() {
         params: {
             historicalPeriod: period.data.slug,
         },
-        props: { period, places },
+        props: { period, allPeriods: periods, places },
     }));
 }
 
-const { period, places } = Astro.props;
+const { period, allPeriods, places } = Astro.props;
 ---
 
 <PageWrapper
@@ -30,16 +32,42 @@ const { period, places } = Astro.props;
         <header>
             <div class="eyebrow small-title">Historical Period</div>
             <h1>{period.data.title}</h1>
+            {
+                period.data.startDate && period.data.endDate && (
+                    <p class="dates">{`${formatPeriodDate(period.data.startDate)} – ${formatPeriodDate(period.data.endDate)}`}</p>
+                )
+            }
         </header>
-        <div class="list-spacer">
-            <PlacesList
-                places={period.data.places.map((place) => {
-                    const linkedPlace = places.find((p) => p.id === place._id);
-                    if (linkedPlace) {
-                        return linkedPlace;
-                    }
-                })}
-            />
+        <div class="list-spacer | with-sidebar">
+            <div class="sidebar-panel | flow">
+                <DetailsFilter
+                    links={allPeriods
+                        .sort((a, b) => (a.data.title > b.data.title ? 1 : -1))
+                        .map((period) => ({
+                            title: period.data.title,
+                            href: period.data.slug,
+                        }))}
+                    title="Filter by Period"
+                />
+                <a
+                    class="button-link"
+                    data-size="small"
+                    data-style="primary"
+                    href="/sites">Show All</a
+                >
+            </div>
+            <div class="main-panel">
+                <PlacesList
+                    places={period.data.places.map((place) => {
+                        const linkedPlace = places.find(
+                            (p) => p.id === place._id,
+                        );
+                        if (linkedPlace) {
+                            return linkedPlace;
+                        }
+                    })}
+                />
+            </div>
         </div>
         <div>
             {period.data.places.map((place) => {})}
@@ -50,6 +78,11 @@ const { period, places } = Astro.props;
 <style>
     .eyebrow {
         font-size: var(--step--1);
+        margin-block-end: var(--space-3xs);
+    }
+
+    .dates {
+        margin-block-start: var(--space-s);
     }
 
     .period {
@@ -58,5 +91,13 @@ const { period, places } = Astro.props;
 
     .list-spacer {
         margin-block-start: var(--space-2xl);
+    }
+
+    .with-sidebar {
+        --sidebar-min-width: 13rem;
+    }
+
+    :global(.page[data-template='historicalPeriodsShow'] .sidebar-panel) {
+        --flow-space: 1rem;
     }
 </style>

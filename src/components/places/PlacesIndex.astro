@@ -1,10 +1,33 @@
 ---
+import DetailsFilter from '@components/interactive/DetailsFilter.astro';
 import PlacesList from '@components/places/PlacesList.astro';
 import { getCollection } from 'astro:content';
 
 const places = await getCollection('places');
+const periods = await getCollection('historicalPeriods');
 ---
 
 <div class="content-wrapper">
-    <PlacesList places={places} />
+    <div class="with-sidebar">
+        <div class="sidebar-panel">
+            <DetailsFilter
+                links={periods
+                    .sort((a, b) => (a.data.title > b.data.title ? 1 : -1))
+                    .map((period) => ({
+                        title: period.data.title,
+                        href: period.data.slug,
+                    }))}
+                title="Filter by Period"
+            />
+        </div>
+        <div class="main-panel">
+            <PlacesList places={places} />
+        </div>
+    </div>
 </div>
+
+<style>
+    .with-sidebar {
+        --sidebar-min-width: 13rem;
+    }
+</style>

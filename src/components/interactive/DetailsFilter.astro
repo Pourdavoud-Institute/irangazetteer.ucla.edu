@@ -1,0 +1,93 @@
+---
+interface Props {
+    open?: boolean;
+    title: string;
+    links: { title: string; href: string }[];
+}
+
+const { open = true, title, links } = Astro.props;
+
+const url = Astro.url;
+let pathname = url.pathname;
+
+// slice trailing '/' if exists
+if (pathname.endsWith('/')) {
+    pathname = pathname.slice(0, -1);
+}
+---
+
+<details class="details-filter" data-pagefind-ignore="all" open={open}>
+    <summary class="filter-title small-title | with-icon">
+        {title}
+        <svg
+            aria-hidden="true"
+            height="24"
+            viewBox="0 0 24 24"
+            width="24"
+            xmlns="http://www.w3.org/2000/svg"
+            ><path d="M18 9.41L16.59 8L12 12.58L7.41 8L6 9.41L12 15.41L18 9.41Z"
+            ></path></svg
+        >
+    </summary>
+    <ul class="filter-links">
+        {
+            links.map((link) => (
+                <li>
+                    <a
+                        aria-current={link.href == pathname ? 'page' : 'false'}
+                        class="filter-link"
+                        href={link.href}
+                    >
+                        {link.title}
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+</details>
+
+<style>
+    .details-filter {
+        border-block-end: 1px solid var(--site-border);
+        padding-block-end: 1rem;
+
+        &[open] svg {
+            rotate: -180deg;
+        }
+    }
+
+    .filter-title {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: space-between;
+        font-size: var(--step--1);
+        padding-inline: 0.25rem;
+
+        &:hover {
+            --svg-fill: var(--ucla-primary-blue);
+        }
+    }
+
+    .filter-links {
+        margin-block-start: 0.5rem;
+        margin-inline: -0.25rem;
+    }
+
+    .filter-link {
+        display: block;
+        text-decoration-color: transparent;
+        font-size: 14px;
+        padding: 0.25rem 0.5rem;
+
+        &:hover {
+            color: var(--ucla-primary-blue);
+            text-decoration-color: var(--ucla-primary-blue);
+            background-color: var(--ucla-gray-1);
+        }
+
+        &[aria-current='page'] {
+            color: var(--ucla-primary-blue);
+            font-weight: 700;
+        }
+    }
+</style>
